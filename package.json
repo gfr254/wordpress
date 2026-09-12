@@ -1,0 +1,13 @@
+{
+  "name": "kazuhiro-beetle-auto-poster",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "post": "node src/post.js",
+    "start": "node src/post.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

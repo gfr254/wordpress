@@ -2,20 +2,26 @@
 
 空冷ビートルとの暮らしをテーマに、OpenAIで1日1記事（本文350〜450文字程度）を生成し、WordPress REST APIへ画像なしで投稿するスクリプトです。
 
+このリポジトリでは、WordPress本体と自動投稿Cronを別サービスとしてRailwayに配置します。WordPress本体のDocker設定は `wordpress/` にあります。
+
 ## 構成
 
 - **GitHub**: ソースコードを管理
 - **OpenAI**: 記事タイトルと本文を生成
-- **Railway**: Cronで毎日1回スクリプトを実行
+- **Railway**: WordPress Webサービスと、毎日1回動く自動投稿Cronを実行
 - **Cloudflare**: `kazuhiro-beetle.com` のDNS・SSLを管理
 - **WordPress**: REST API経由で記事を公開
 
 ## Railwayへの設定
 
+自動投稿用Cronサービスを作る場合:
+
 1. RailwayでこのGitHubリポジトリからサービスを作成する。
 2. Variablesに `.env.example` の項目を登録する。
 3. Service SettingsのStart Commandを `npm run post` にする。
 4. Cron Scheduleを `0 0 * * *` にする。
+
+WordPress本体をRailwayに作る手順は [`wordpress/README.md`](wordpress/README.md) を参照してください。WordPress本体のサービスにはCustom Domainを設定し、自動投稿Cronサービスにはドメインを設定しません。
 
 RailwayのCronはUTCで動くため、`0 0 * * *` は日本時間の毎日09:00です。実行後にプロセスが終了する構成なので、Cronサービスとして再実行できます。
 

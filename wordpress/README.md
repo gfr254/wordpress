@@ -9,7 +9,7 @@
 ### 1. WordPress Webサービス
 
 - Root Directory: `/wordpress`
-- Dockerfile: `wordpress/Dockerfile`
+- Dockerfile: `Dockerfile`
 - 長時間起動する通常のWebサービス
 - Custom Domain: `kazuhiro-beetle.com`
 

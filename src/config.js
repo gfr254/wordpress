@@ -17,8 +17,8 @@ export const config = {
     ? Number(process.env.WP_CATEGORY_ID)
     : undefined,
   authorName: process.env.AUTHOR_NAME?.trim() || "かずひろ",
-  blogTitle: process.env.BLOG_TITLE?.trim() || "空冷ビートルと暮らす時間",
+  blogTitle: process.env.BLOG_TITLE?.trim() || "空冷かずひろ｜空冷VW購入前ノート",
   contentContext:
     process.env.CONTENT_CONTEXT?.trim() ||
-    "空冷ビートルとの暮らし、旅、日常、メンテナンスを記録するブログです。入力されていない個人的な事実は創作しません。",
+    "空冷VWをまだ所有していない筆者が、購入前の情報、価格、維持費、故障、現車確認、オーナーの声を調べて紹介するブログです。所有や整備の体験談は創作しません。",
 };

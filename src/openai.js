@@ -89,8 +89,8 @@ export async function generateArticle({ dateKey, chapter, topic }) {
   }
 
   const bodyLength = [...article.body.replace(/\s/g, "")].length;
-  if (bodyLength < 280 || bodyLength > 520) {
-    throw new Error(`本文が400文字程度の範囲外です（${bodyLength}文字）。`);
+  if (bodyLength < 280 || bodyLength > 700) {
+    throw new Error(`本文が280〜700文字の範囲外です（${bodyLength}文字）。`);
   }
 
   return {

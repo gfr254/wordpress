@@ -34,6 +34,13 @@ WP_USERNAME=WordPressユーザー名
 WP_APP_PASSWORD=WordPressのアプリケーションパスワード
 ```
 
+## Amazonアフィリエイト
+
+AMAZON_ASSOCIATE_TAGをRailwayのVariablesに設定すると、「部品」「用語」「購入知識」の記事にAmazon.co.jp検索リンクを自動挿入します。価格・在庫・商品画像は取得せず、記事テーマから検索キーワードを作る方式です。
+
+リンク付近にはAmazonアソシエイトの開示文を表示します。PA-APIの認証情報は不要です。
+
+
 ### 任意Variables
 
 ```text

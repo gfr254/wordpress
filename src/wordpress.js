@@ -36,7 +36,18 @@ function toHtmlParagraphs(body) {
     .join("\n");
 }
 
-export async function publishArticle({ slug, title, body }) {
+function escapeHtml(value) {
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+}
+
+function toAffiliateHtml(affiliate) {
+  if (!affiliate) return "";
+  return [
+    "<p class=\"amazon-affiliate-disclosure\">" + escapeHtml(affiliate.disclosure) + "</p>",
+    "<p class=\"amazon-affiliate-link\"><a href=\"" + escapeHtml(affiliate.url) + "\" rel=\"nofollow sponsored\" target=\"_blank\">" + escapeHtml(affiliate.label) + "</a></p>",
+  ].join(String.fromCharCode(10));
+}
+export async function publishArticle({ slug, title, body, affiliate }) {
   const existing = await wpRequest(
     `/posts?slug=${encodeURIComponent(slug)}&_fields=id,link,slug`,
   );
@@ -46,7 +57,7 @@ export async function publishArticle({ slug, title, body }) {
 
   const payload = {
     title,
-    content: toHtmlParagraphs(body),
+    content: [toHtmlParagraphs(body), toAffiliateHtml(affiliate)].filter(Boolean).join(String.fromCharCode(10)),
     slug,
     status: config.wpStatus,
     excerpt: body.replace(/\s+/g, " ").slice(0, 120),

@@ -47,7 +47,7 @@ AMAZON_ASSOCIATE_TAGをRailwayのVariablesに設定すると、「部品」「�
 OPENAI_MODEL=gpt-4.1-mini
 WP_STATUS=publish
 WP_CATEGORY_ID=
-AUTHOR_NAME=かずひろ
+AUTHOR_NAME=空冷かずひろ
 BLOG_TITLE=空冷ビートルと暮らす時間
 CONTENT_CONTEXT=空冷ビートルとの暮らし、旅、日常、メンテナンスを記録するブログです。
 ```

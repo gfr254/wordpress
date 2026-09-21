@@ -18,7 +18,7 @@ export const config = {
     : undefined,
   amazonAssociateTag: process.env.AMAZON_ASSOCIATE_TAG?.trim() || "",
   amazonKeywordPrefix: process.env.AMAZON_KEYWORD_PREFIX?.trim() || "空冷VW",
-  authorName: process.env.AUTHOR_NAME?.trim() || "かずひろ",
+  authorName: process.env.AUTHOR_NAME?.trim() || "空冷かずひろ",
   blogTitle: process.env.BLOG_TITLE?.trim() || "空冷かずひろ｜空冷VW用語・歴史ノート",
   contentContext:
     process.env.CONTENT_CONTEXT?.trim() ||

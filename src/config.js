@@ -18,6 +18,10 @@ export const config = {
     : undefined,
   amazonAssociateTag: process.env.AMAZON_ASSOCIATE_TAG?.trim() || "",
   amazonKeywordPrefix: process.env.AMAZON_KEYWORD_PREFIX?.trim() || "空冷VW",
+  rakutenApplicationId: process.env.RAKUTEN_APPLICATION_ID?.trim() || "",
+  rakutenAffiliateId: process.env.RAKUTEN_AFFILIATE_ID?.trim() || "",
+  rakutenKeywordPrefix: process.env.RAKUTEN_KEYWORD_PREFIX?.trim() || "空冷VW",
+  rakutenMaxItems: Math.min(Math.max(Number(process.env.RAKUTEN_MAX_ITEMS) || 3, 1), 5),
   authorName: process.env.AUTHOR_NAME?.trim() || "空冷かずひろ",
   blogTitle: process.env.BLOG_TITLE?.trim() || "空冷かずひろ｜空冷VW用語・歴史ノート",
   contentContext:

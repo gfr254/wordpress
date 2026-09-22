@@ -3,6 +3,7 @@ import { getTodayContext } from "./content-plan.js";
 import { generateArticle } from "./openai.js";
 import { publishArticle } from "./wordpress.js";
 import { buildAmazonAffiliate } from "./amazon.js";
+import { buildRakutenAffiliate } from "./rakuten.js";
 
 async function main() {
   const context = getTodayContext();
@@ -21,11 +22,25 @@ async function main() {
     console.log("Amazonリンクを追加します: " + affiliate.keyword);
   }
 
+  let rakuten = null;
+  try {
+    rakuten = await buildRakutenAffiliate({
+      chapter: context.chapter,
+      topic: context.topic,
+    });
+    if (rakuten) {
+      console.log(`楽天リンクを追加します: ${rakuten.keyword}（${rakuten.products.length}件）`);
+    }
+  } catch (error) {
+    console.warn("楽天商品検索をスキップしました: " + (error instanceof Error ? error.message : error));
+  }
+
   const result = await publishArticle({
     slug: context.slug,
     title: article.title,
     body: article.body,
     affiliate,
+    rakuten,
   });
 
   if (result.skipped) {

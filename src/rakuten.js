@@ -1,7 +1,7 @@
 import { config } from "./config.js";
 
 const monetizedChapters = new Set(["部品", "用語", "購入知識"]);
-const endpoint = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601";
+const endpoint = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20260701";
 
 function imageUrl(item) {
   const images = item.mediumImageUrls || item.smallImageUrls || [];
@@ -27,6 +27,7 @@ function normalizeItem(entry) {
 export async function buildRakutenAffiliate({ chapter, topic }) {
   if (
     !config.rakutenApplicationId ||
+    !config.rakutenAccessKey ||
     !config.rakutenAffiliateId ||
     !monetizedChapters.has(chapter)
   ) {
@@ -36,6 +37,7 @@ export async function buildRakutenAffiliate({ chapter, topic }) {
   const keyword = (config.rakutenKeywordPrefix + " " + topic).trim();
   const url = new URL(endpoint);
   url.searchParams.set("applicationId", config.rakutenApplicationId);
+  url.searchParams.set("accessKey", config.rakutenAccessKey);
   url.searchParams.set("affiliateId", config.rakutenAffiliateId);
   url.searchParams.set("keyword", keyword);
   url.searchParams.set("hits", String(config.rakutenMaxItems));
@@ -57,7 +59,7 @@ export async function buildRakutenAffiliate({ chapter, topic }) {
     throw new Error("楽天APIエラー (" + response.status + "): " + JSON.stringify(data));
   }
 
-  const products = (Array.isArray(data?.Items) ? data.Items : [])
+  const products = (Array.isArray(data?.items) ? data.items : [])
     .map(normalizeItem)
     .filter(Boolean)
     .slice(0, config.rakutenMaxItems);

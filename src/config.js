@@ -19,6 +19,7 @@ export const config = {
   amazonAssociateTag: process.env.AMAZON_ASSOCIATE_TAG?.trim() || "",
   amazonKeywordPrefix: process.env.AMAZON_KEYWORD_PREFIX?.trim() || "空冷VW",
   rakutenApplicationId: process.env.RAKUTEN_APPLICATION_ID?.trim() || "",
+  rakutenAccessKey: process.env.RAKUTEN_ACCESS_KEY?.trim() || "",
   rakutenAffiliateId: process.env.RAKUTEN_AFFILIATE_ID?.trim() || "",
   rakutenKeywordPrefix: process.env.RAKUTEN_KEYWORD_PREFIX?.trim() || "空冷VW",
   rakutenMaxItems: Math.min(Math.max(Number(process.env.RAKUTEN_MAX_ITEMS) || 3, 1), 5),

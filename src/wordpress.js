@@ -40,14 +40,34 @@ function escapeHtml(value) {
   return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
 }
 
-function toAffiliateHtml(affiliate) {
-  if (!affiliate) return "";
-  return [
-    "<p class=\"amazon-affiliate-disclosure\">" + escapeHtml(affiliate.disclosure) + "</p>",
-    "<p class=\"amazon-affiliate-link\"><a href=\"" + escapeHtml(affiliate.url) + "\" rel=\"nofollow sponsored\" target=\"_blank\">" + escapeHtml(affiliate.label) + "</a></p>",
-  ].join(String.fromCharCode(10));
+function toAffiliateHtml({ amazon, rakuten }) {
+  const blocks = [];
+  if (amazon) {
+    blocks.push(
+      "<p class=\"amazon-affiliate-disclosure\">" + escapeHtml(amazon.disclosure) + "</p>",
+      "<p class=\"amazon-affiliate-link\"><a href=\"" + escapeHtml(amazon.url) + "\" rel=\"nofollow sponsored noopener\" target=\"_blank\">" + escapeHtml(amazon.label) + "</a></p>",
+    );
+  }
+  if (rakuten) {
+    blocks.push(
+      "<p class=\"rakuten-affiliate-disclosure\">" + escapeHtml(rakuten.disclosure) + "</p>",
+      "<section class=\"rakuten-products\" aria-label=\"楽天おすすめ商品\">",
+      "<h2>関連する楽天市場の商品</h2>",
+      rakuten.products.map((product) => {
+        const image = product.image
+          ? "<img src=\"" + escapeHtml(product.image) + "\" alt=\"" + escapeHtml(product.name) + "\" loading=\"lazy\">"
+          : "";
+        const price = product.price === null
+          ? ""
+          : "<span class=\"rakuten-product-price\">" + product.price.toLocaleString("ja-JP") + "円</span>";
+        return "<article class=\"rakuten-product\">" + image + "<div><h3>" + escapeHtml(product.name) + "</h3>" + price + "<p class=\"rakuten-product-shop\">" + escapeHtml(product.shop) + "</p><a href=\"" + escapeHtml(product.url) + "\" rel=\"nofollow sponsored noopener\" target=\"_blank\">楽天市場で見る</a></div></article>";
+      }).join(String.fromCharCode(10)),
+      "</section>",
+    );
+  }
+  return blocks.join(String.fromCharCode(10));
 }
-export async function publishArticle({ slug, title, body, affiliate }) {
+export async function publishArticle({ slug, title, body, affiliate, rakuten }) {
   const existing = await wpRequest(
     `/posts?slug=${encodeURIComponent(slug)}&_fields=id,link,slug`,
   );
@@ -57,7 +77,7 @@ export async function publishArticle({ slug, title, body, affiliate }) {
 
   const payload = {
     title,
-    content: [toHtmlParagraphs(body), toAffiliateHtml(affiliate)].filter(Boolean).join(String.fromCharCode(10)),
+    content: [toHtmlParagraphs(body), toAffiliateHtml({ amazon: affiliate, rakuten })].filter(Boolean).join(String.fromCharCode(10)),
     slug,
     status: config.wpStatus,
     excerpt: body.replace(/\s+/g, " ").slice(0, 120),

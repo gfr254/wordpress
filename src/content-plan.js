@@ -46,6 +46,27 @@ function tokyoDateParts(date = new Date()) {
   );
 }
 
+function categoryKeyForTopic(chapter, topic) {
+  if (chapter === "歴史") return "historyCulture";
+  if (chapter === "用語") return "structureTerms";
+  if (chapter === "部品") return "maintenance";
+  if (chapter === "購入知識") return "buyingGuide";
+  if (chapter === "文化") {
+    if (/カスタム/.test(topic)) return "custom";
+    if (/イベント/.test(topic)) return "eventsLife";
+    return "historyCulture";
+  }
+  if (chapter === "基礎知識") {
+    if (/維持|記録|車検|点検|安全/.test(topic)) return "maintenance";
+    return "structureTerms";
+  }
+  if (chapter === "写真で学ぶ") {
+    if (/年式/.test(topic)) return "buyingGuide";
+    return "structureTerms";
+  }
+  return "historyCulture";
+}
+
 export function getTodayContext(date = new Date()) {
   const { year, month, day } = tokyoDateParts(date);
   const dateKey = `${year}-${month}-${day}`;
@@ -58,6 +79,7 @@ export function getTodayContext(date = new Date()) {
     dateKey,
     chapter,
     topic,
+    categoryKey: categoryKeyForTopic(chapter, topic),
     slug: `beetle-life-${dateKey}`
   };
 }

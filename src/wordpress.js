@@ -27,6 +27,86 @@ async function wpRequest(path, options = {}) {
   return data;
 }
 
+const categoryDefinitions = {
+  historyCulture: { name: "歴史・文化", slug: "history-culture" },
+  structureTerms: { name: "構造・用語", slug: "structure-terms" },
+  maintenance: { name: "整備・維持", slug: "maintenance" },
+  eventsLife: { name: "イベント・暮らし", slug: "events-life" },
+  custom: { name: "カスタム", slug: "custom" },
+  buyingGuide: { name: "購入ガイド", slug: "buying-guide" },
+};
+
+const categoryIdCache = new Map();
+
+async function getOrCreateCategory(categoryKey) {
+  const definition = categoryDefinitions[categoryKey] || categoryDefinitions.structureTerms;
+  if (categoryIdCache.has(definition.slug)) return categoryIdCache.get(definition.slug);
+
+  const existing = await wpRequest(
+    "/categories?slug=" + encodeURIComponent(definition.slug) + "&_fields=id,slug",
+  );
+  if (Array.isArray(existing) && existing.length > 0) {
+    const id = Number(existing[0].id);
+    categoryIdCache.set(definition.slug, id);
+    return id;
+  }
+
+  const created = await wpRequest("/categories", {
+    method: "POST",
+    body: JSON.stringify(definition),
+  });
+  const id = Number(created.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error("WordPressカテゴリの作成結果からIDを取得できませんでした。");
+  }
+  categoryIdCache.set(definition.slug, id);
+  return id;
+}
+
+function classifyExistingPost(title) {
+  const text = String(title || "").normalize("NFKC");
+  if (/販売|購入|買い|選び方|年式/.test(text)) return "buyingGuide";
+  if (/イベント|旅行|旅/.test(text)) return "eventsLife";
+  if (/カスタム/.test(text)) return "custom";
+  if (/故障|トラブル|維持|メンテナンス|車検|点検|安全|記録|整備|オイル漏れ|交換/.test(text)) return "maintenance";
+  if (/構造|用語|仕組み|違い|エンジン|冷却|キャブレター|点火|型式/.test(text)) return "structureTerms";
+  return "historyCulture";
+}
+
+export async function recategorizeUncategorizedPosts() {
+  const defaultCategories = await wpRequest(
+    "/categories?slug=uncategorized&_fields=id,slug",
+  );
+  if (!Array.isArray(defaultCategories) || defaultCategories.length === 0) return 0;
+
+  const uncategorizedId = Number(defaultCategories[0].id);
+  const posts = [];
+  let page = 1;
+  while (true) {
+    const batch = await wpRequest(
+      "/posts?categories=" + uncategorizedId + "&per_page=100&page=" + page + "&_fields=id,title,categories",
+    );
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    posts.push(...batch);
+    if (batch.length < 100) break;
+    page += 1;
+  }
+
+  let updatedCount = 0;
+  for (const post of posts) {
+    const categoryId = await getOrCreateCategory(classifyExistingPost(post.title?.rendered));
+    const currentIds = (post.categories || []).filter((id) => Number(id) !== uncategorizedId);
+    const nextIds = Array.from(new Set([...currentIds, categoryId]));
+    if (currentIds.length === nextIds.length && currentIds.every((id, index) => id === nextIds[index])) continue;
+    await wpRequest("/posts/" + post.id, {
+      method: "POST",
+      body: JSON.stringify({ categories: nextIds }),
+    });
+    updatedCount += 1;
+  }
+  return updatedCount;
+}
+
 function toHtmlParagraphs(body) {
   return body
     .split(/\n{2,}/)
@@ -67,7 +147,7 @@ function toAffiliateHtml({ amazon, rakuten }) {
   }
   return blocks.join(String.fromCharCode(10));
 }
-export async function publishArticle({ slug, title, body, affiliate, rakuten }) {
+export async function publishArticle({ slug, title, body, categoryKey, affiliate, rakuten }) {
   const existing = await wpRequest(
     `/posts?slug=${encodeURIComponent(slug)}&_fields=id,link,slug`,
   );
@@ -82,9 +162,7 @@ export async function publishArticle({ slug, title, body, affiliate, rakuten }) 
     status: config.wpStatus,
     excerpt: body.replace(/\s+/g, " ").slice(0, 120),
   };
-  if (Number.isInteger(config.wpCategoryId) && config.wpCategoryId > 0) {
-    payload.categories = [config.wpCategoryId];
-  }
+  payload.categories = [await getOrCreateCategory(categoryKey)];
 
   const post = await wpRequest("/posts", {
     method: "POST",

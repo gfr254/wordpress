@@ -1,12 +1,16 @@
 import { config } from "./config.js";
 import { getTodayContext } from "./content-plan.js";
 import { generateArticle } from "./openai.js";
-import { publishArticle } from "./wordpress.js";
+import { publishArticle, recategorizeUncategorizedPosts } from "./wordpress.js";
 import { buildAmazonAffiliate } from "./amazon.js";
 import { buildRakutenAffiliate } from "./rakuten.js";
 
 async function main() {
   const context = getTodayContext();
+  const recategorizedCount = await recategorizeUncategorizedPosts();
+  if (recategorizedCount > 0) {
+    console.log("既存の未分類記事を自動分類しました: " + recategorizedCount + "件");
+  }
   console.log(
     `[${context.dateKey}] ${context.chapter} / ${context.topic} の記事を生成します。`,
   );
@@ -37,6 +41,7 @@ async function main() {
 
   const result = await publishArticle({
     slug: context.slug,
+    categoryKey: context.categoryKey,
     title: article.title,
     body: article.body,
     affiliate,
